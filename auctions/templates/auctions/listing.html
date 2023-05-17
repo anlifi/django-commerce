@@ -1,0 +1,23 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <h2>Listing: {{ listing.title }}</h2>
+
+    <div class="container-fluid">
+        {% if listing.image_url %}
+            <img alt="{{ listing.title }}" src="{{ listing.image_url }}">
+        {% else %}
+            <img alt="No image available" src="https://t3.ftcdn.net/jpg/04/34/72/82/240_F_434728286_OWQQvAFoXZLdGHlObozsolNeuSxhpr84.jpg">
+        {% endif %}
+        <p>{{ listing.description }}</p>
+        <p>${{ listing.current_bid }}</p>
+
+        <h3>Details</h3>
+        <ul>
+            <li>Listed by: {{ listing.seller.username }}</li>
+            <li>Category: {{ listing.category }}</li>
+        </ul>
+    </div>
+
+{% endblock %}
