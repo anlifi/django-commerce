@@ -42,7 +42,11 @@ def create(request):
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    # Get all active listings
+    listings = Listing.objects.filter(closed=False)
+    return render(request, "auctions/index.html", {
+        "listings": listings
+    })
 
 
 def listing(request, id):
