@@ -110,6 +110,41 @@ def bid(request, id):
     })
 
 
+@login_required(login_url="login")
+def close(request, id):
+    # Only POST method allowed
+    if request.method == "POST":
+        # Check if listing exists
+        try:
+            listing = Listing.objects.get(pk=id)
+        
+        except Listing.DoesNotExist:
+            return render(request, "auctions/error.html", {
+                "code": 404,
+                "message": "The listing does not exist."
+            })
+        
+        # Check if user is seller of listing
+        if listing.seller != request.user:
+            # Show error message and return listing page
+            messages.error(request, "Only listing's seller can close auction.")
+            return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+        
+        # Close auction
+        listing.closed = True
+        listing.save()
+
+        # Show success message and return listing page
+        messages.success(request, "Auction closed.")
+        return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+    
+    # GET method not allowed
+    return render(request, "auctions/error.html", {
+        "code": 405,
+        "message": "GET method not allowed."
+    })
+
+
 def create(request):
     if request.method == "POST":
         # Create form instance with POST data and check if valid
@@ -166,6 +201,7 @@ def listing(request, id):
     highest_bidder = None
     current_bid = False
     bid_form = None
+    winner = False
 
     # Check if listing in watchlist
     if user.is_authenticated and Watchlist.objects.filter(user=user, listings=listing):
@@ -182,6 +218,10 @@ def listing(request, id):
         if highest_bidder == request.user:
             current_bid = True
 
+            # Check if auction is closed
+            if listing.closed:
+                winner = True
+
     # New bid form
     bid_form = NewBidForm()
 
@@ -192,7 +232,8 @@ def listing(request, id):
         "bid_count": bid_count,
         "highest_bidder": highest_bidder,
         "current_bid": current_bid,
-        "bid_form": bid_form
+        "bid_form": bid_form,
+        "winner": winner
     })
 
 

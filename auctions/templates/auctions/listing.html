@@ -37,7 +37,17 @@
             <img alt="No image available" src="https://t3.ftcdn.net/jpg/04/34/72/82/240_F_434728286_OWQQvAFoXZLdGHlObozsolNeuSxhpr84.jpg">
         {% endif %}
         <p>{{ listing.description }}</p>
-        <p class="fw-bold mt-4">${{ listing.current_bid }}</p>
+        <div>
+            <p class="fw-bold mt-4">${{ listing.current_bid }}</p>
+            {% if user.is_authenticated and listing.closed %}
+                <p class="fw-medium text-primary">Auction closed.</p>
+                {% if winner %}
+                    <p class="fw-medium text-primary">Congrats, you have won the auction for this listing.</p>
+                {% else %}
+                    <p class="fw-medium text-primary">Sorry, you have not won the auction for this listing.</p>
+                {% endif %}
+            {% endif %}
+        </div>
 
         <!-- Bid form -->
         {% if user.is_authenticated and not listing.closed %}
@@ -72,6 +82,14 @@
                 <li>Category: {{ listing.category }}</li>
             </ul>
         </div>
+
+        <!-- Close auction -->
+        {% if user.is_authenticated and not listing.closed and listing.seller == user %}
+            <form action="{% url 'close' id=listing.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary mt-3">Close Auction</button>
+            </form>
+        {% endif %}
     </div>
 
 {% endblock %}
