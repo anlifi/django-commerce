@@ -90,6 +90,37 @@
                 <button type="submit" class="btn btn-primary mt-3">Close Auction</button>
             </form>
         {% endif %}
+
+        <!-- Comments -->
+        {% if user.is_authenticated %}
+        <div class="mt-4">
+            <h3>Add a Comment</h3>
+
+            <!-- Comment form -->
+            <form class="container ml-0 pl-0" action="{% url 'comment' id=listing.pk %}" method="post">
+                {% csrf_token %}
+                {{ comment_form | crispy }}
+                <button type="submit" class="btn btn-primary mt-3">Add comment</button>
+            </form>
+        </div>
+
+        <!-- Comment List -->
+        <div class="container ml-0 pl-0 mt-4">
+            <h3>Comments</h3>
+            {% for comment in comments %}
+                <div class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">{{ comment.title }}</h5>
+                            <small>{{ comment.date }}</small>
+                        </div>
+                        <p class="mb-1">{{ comment.content }}</p>
+                        <small>{{ comment.user.get_username }}</small>
+                    </li>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
 
 {% endblock %}

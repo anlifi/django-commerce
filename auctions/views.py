@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .forms import NewListingForm, NewBidForm
+from .forms import NewListingForm, NewBidForm, NewCommentForm
 from .models import User, Category, Listing, Bid, Comment, Watchlist
 
 
@@ -102,6 +102,13 @@ def bid(request, id):
                 # Show success message and return listing page
                 messages.success(request, "Successfully placed bid.")
                 return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+        
+        else:
+            # If invalid show error message and return form with existing data
+            messages.error(request, "Invalid form. Please resubmit.")
+            return render(request, "auctions/create.html", {
+                "form": form
+            })
 
     # GET method not allowed
     return render(request, "auctions/error.html", {
@@ -145,6 +152,45 @@ def close(request, id):
     })
 
 
+@login_required(login_url="login")
+def comment(request, id):
+    # Only POST method allowed
+    if request.method == "POST":
+        # Check if listing exists
+        try:
+            listing = Listing.objects.get(pk=id)
+        
+        except Listing.DoesNotExist:
+            return render(request, "auctions/error.html", {
+                "code": 404,
+                "message": "The listing does not exist."
+            })
+        
+        # Create form instance with POST data and check if valid
+        form = NewCommentForm(request.POST)
+        if form.is_valid():
+            # Save form data to model, set bidder and listing
+            new_comment = form.save(commit=False)
+            new_comment.user = request.user
+            new_comment.listing = listing
+            new_comment.save()
+
+            # Show success message and return listing page
+            messages.success(request, "New comment created.")
+            return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+        
+        else:
+            # Show error message and return listing page
+            messages.error(request, "Invalid form. Please resubmit.")
+            return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+    
+    # GET method not allowed
+    return render(request, "auctions/error.html", {
+        "code": 405,
+        "message": "GET method not allowed."
+    })
+
+
 def create(request):
     if request.method == "POST":
         # Create form instance with POST data and check if valid
@@ -157,12 +203,11 @@ def create(request):
             new_listing.save()
 
             # Show success message and return page with new listing
-            messages.success(request, "New Listing created.")
+            messages.success(request, "New listing created.")
             return HttpResponseRedirect(reverse("listing", kwargs={"id": new_listing.pk}))
         
         else:
             # If invalid show error message and return form with existing data
-            form = NewListingForm(request.POST)
             messages.error(request, "Invalid form. Please resubmit.")
             return render(request, "auctions/create.html", {
                 "form": form
@@ -225,6 +270,12 @@ def listing(request, id):
     # New bid form
     bid_form = NewBidForm()
 
+    # New comment form
+    comment_form = NewCommentForm()
+
+    # Get all comments for listing
+    comments = Comment.objects.filter(listing=listing).order_by("-date")
+
     # Return listing page
     return render(request, "auctions/listing.html", {
         "listing": listing,
@@ -233,7 +284,9 @@ def listing(request, id):
         "highest_bidder": highest_bidder,
         "current_bid": current_bid,
         "bid_form": bid_form,
-        "winner": winner
+        "winner": winner,
+        "comment_form": comment_form,
+        "comments": comments
     })
 
 
