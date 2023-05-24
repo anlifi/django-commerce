@@ -1,9 +1,9 @@
 {% extends "auctions/layout.html" %}
+{% load crispy_forms_tags %}
 
 {% block body %}
 
-    <h2>Listing: {{ listing.title }}</h2>
-
+    <!-- Success or error messages -->
     {% if messages %}
         <ul class="messages">
             {% for message in messages %}
@@ -11,33 +11,67 @@
             {% endfor %}
         </ul>
     {% endif %}
+    
+    <h2>Listing: {{ listing.title }}</h2>
 
-    {% if watching %}
-        <form action="{% url 'remove' id=listing.pk %}" method="post">
-            {% csrf_token %}
-            <button class="btn btn-secondary btn-sm" type="submit" name="remove">Remove from Watchlist</button>
-        </form>
-    {% else %}
-        <form action="{% url 'add' id=listing.pk %}" method="post">
-            {% csrf_token %}
-            <button class="btn btn-secondary btn-sm" type="submit" name="add">Add to Watchlist</button>
-        </form>
+    <!-- Add or remove watchlist -->
+    {% if user.is_authenticated %}
+        {% if watching %}
+            <form action="{% url 'remove' id=listing.pk %}" method="post">
+                {% csrf_token %}
+                <button class="btn btn-secondary btn-sm" type="submit" name="remove">Remove from Watchlist</button>
+            </form>
+        {% else %}
+            <form action="{% url 'add' id=listing.pk %}" method="post">
+                {% csrf_token %}
+                <button class="btn btn-secondary btn-sm" type="submit" name="add">Add to Watchlist</button>
+            </form>
+        {% endif %}
     {% endif %}
 
-    <div class="container-fluid">
+    <!-- Listing info -->
+    <div>
         {% if listing.image_url %}
             <img alt="{{ listing.title }}" src="{{ listing.image_url }}">
         {% else %}
             <img alt="No image available" src="https://t3.ftcdn.net/jpg/04/34/72/82/240_F_434728286_OWQQvAFoXZLdGHlObozsolNeuSxhpr84.jpg">
         {% endif %}
         <p>{{ listing.description }}</p>
-        <p>${{ listing.current_bid }}</p>
+        <p class="fw-bold mt-4">${{ listing.current_bid }}</p>
 
-        <h3>Details</h3>
-        <ul>
-            <li>Listed by: {{ listing.seller.username }}</li>
-            <li>Category: {{ listing.category }}</li>
-        </ul>
+        <!-- Bid form -->
+        {% if user.is_authenticated and not listing.closed %}
+            <form action="{% url 'bid' id=listing.pk %}" method="post">
+                {% csrf_token %}
+                {% for field in bid_form %}
+                    <div class="form-group">
+                        <small>
+                            <span>
+                                {{ bid_count }} bid(s) so far.
+                                {% if bid_count > 0 %}
+                                    {% if current_bid %}
+                                        Your bid is the current bid.
+                                    {% else %}
+                                        Your bid is not the current bid.
+                                    {% endif %}
+                                {% endif %}
+                            </span>
+                        </small>
+                        <div>{{ field | as_crispy_field }}</div>
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary mt-3">Place Bid</button>
+            </form>
+        {% endif %}
+
+        <!-- Listing details -->
+        <div class="mt-4">
+            <h3>Details</h3>
+            <ul>
+                <li>Listed by: {{ listing.seller.username }}</li>
+                <li>Category: {{ listing.category }}</li>
+            </ul>
+        </div>
     </div>
 
 {% endblock %}

@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .forms import NewListingForm
+from .forms import NewListingForm, NewBidForm
 from .models import User, Category, Listing, Bid, Comment, Watchlist
 
 
@@ -51,13 +51,69 @@ def addWatchlist(request, id):
     })
 
 
+@login_required(login_url="login")
+def bid(request, id):    
+    # Only POST method allowed
+    if request.method == "POST":
+        # Check if listing exists
+        try:
+            listing = Listing.objects.get(pk=id)
+        
+        except Listing.DoesNotExist:
+            return render(request, "auctions/error.html", {
+                "code": 404,
+                "message": "The listing does not exist."
+            })
+        
+        # Check if listing is closed
+        if listing.closed is True:
+            messages.error(request, "Listing is closed, placing a bid is not possible.")
+            return HttpResponseRedirect(reverse("listing", kwargs={"id": id})) 
+    
+        # Create form instance with POST data and check if valid
+        form = NewBidForm(request.POST)
+        if form.is_valid():
+            # Save form data to model, set bidder and listing
+            new_bid = form.save(commit=False)
+            new_bid.bidder = request.user
+            new_bid.listing = listing
+
+            # Check if bid at least starting bid and greater than highest bid (if any)
+            # Bid is lower than starting bid  
+            if new_bid.bid_amount < listing.starting_bid:
+                # Show error message and return listing page
+                messages.error(request, "Bid must be at least as large as starting bid.")
+                return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+            
+            # Bid is at least as large as starting bid, other bids exist, but not higher than current bid
+            elif Bid.objects.filter(listing=listing) and new_bid.bid_amount <= listing.current_bid:
+                # Show error message and return listing page
+                messages.error(request, "Bid must be higher than current bid.")
+                return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+            
+            # Bid is at least as large as starting bid, no other bids and/or higher than current bid
+            else:
+                # Save new bid, save amount as listing's current bid
+                new_bid.save()
+                listing.current_bid = new_bid.bid_amount
+                listing.save()
+                
+                # Show success message and return listing page
+                messages.success(request, "Successfully placed bid.")
+                return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+
+    # GET method not allowed
+    return render(request, "auctions/error.html", {
+        "code": 405,
+        "message": "GET method not allowed."
+    })
+
+
 def create(request):
     if request.method == "POST":
-
         # Create form instance with POST data and check if valid
         form = NewListingForm(request.POST)
-        if form.is_valid():
-            
+        if form.is_valid():            
             # Save form data to model, set seller and current_bid
             new_listing = form.save(commit=False)
             new_listing.seller = request.user
@@ -102,18 +158,40 @@ def listing(request, id):
             "message": "The listing does not exist."
         })
 
-    # Set user and defaults for watchlist
+    # Set user and defaults for watchlist and bid
     user = request.user
     watching = False
+    bid_count = 0
+    highest_bidder = None
+    current_bid = False
+    bid_form = None
 
     # Check if listing in watchlist
     if user.is_authenticated and Watchlist.objects.filter(user=user, listings=listing):
         watching = True
 
+    # Check if bids exist
+    if user.is_authenticated and Bid.objects.filter(listing=listing):
+        # Get bid count
+        bid_count = Bid.objects.filter(listing=listing).count()
+
+        # Check if highest bid is user's
+        highest_bid = Bid.objects.filter(listing=listing).order_by("-bid_amount").first()
+        highest_bidder = highest_bid.bidder
+        if highest_bidder == request.user:
+            current_bid = True
+
+    # New bid form
+    bid_form = NewBidForm()
+
     # Return listing page
     return render(request, "auctions/listing.html", {
         "listing": listing,
-        "watching": watching
+        "watching": watching,
+        "bid_count": bid_count,
+        "highest_bidder": highest_bidder,
+        "current_bid": current_bid,
+        "bid_form": bid_form
     })
 
 
@@ -218,7 +296,7 @@ def watchlist(request):
     
     # Get listings in watchlist and number of listings
     listings = watchlist.listings.all()
-    count = len(listings)
+    count = listings.count()
 
     # Return watchlist page with listings
     return render(request, "auctions/watchlist.html", {
