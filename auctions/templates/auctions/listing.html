@@ -4,6 +4,26 @@
 
     <h2>Listing: {{ listing.title }}</h2>
 
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if watching %}
+        <form action="{% url 'remove' id=listing.pk %}" method="post">
+            {% csrf_token %}
+            <button class="btn btn-secondary btn-sm" type="submit" name="remove">Remove from Watchlist</button>
+        </form>
+    {% else %}
+        <form action="{% url 'add' id=listing.pk %}" method="post">
+            {% csrf_token %}
+            <button class="btn btn-secondary btn-sm" type="submit" name="add">Add to Watchlist</button>
+        </form>
+    {% endif %}
+
     <div class="container-fluid">
         {% if listing.image_url %}
             <img alt="{{ listing.title }}" src="{{ listing.image_url }}">

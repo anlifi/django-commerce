@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -7,6 +8,47 @@ from django.urls import reverse
 
 from .forms import NewListingForm
 from .models import User, Category, Listing, Bid, Comment, Watchlist
+
+
+@login_required(login_url="login")
+def addWatchlist(request, id):
+    # Only POST method allowed
+    if request.method == "POST":
+        # Check if listing exists
+        try:
+            listing = Listing.objects.get(pk=id)
+        
+        except Listing.DoesNotExist:
+            return render(request, "auctions/error.html", {
+                "code": 404,
+                "message": "The listing does not exist."
+            })
+
+        # Check if user's watchlist exists else create new one
+        try:
+            watchlist = Watchlist.objects.get(user=request.user)
+        
+        except Watchlist.DoesNotExist:
+            watchlist = Watchlist.objects.create(user=request.user)
+        
+        # Check if listing already in watchlist
+        if Watchlist.objects.filter(user=request.user, listings=listing):
+            # Show error message and return to listing page
+            messages.error(request, "This listing is already in your watchlist.")
+            return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+        
+        # Add listing to watchlist
+        watchlist.listings.add(listing)
+
+        # Show success message and return listing page
+        messages.success(request, "Listing added to your watchlist.")
+        return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+    
+    # GET method not allowed
+    return render(request, "auctions/error.html", {
+        "code": 405,
+        "message": "GET method not allowed."
+    })
 
 
 def create(request):
@@ -50,10 +92,28 @@ def index(request):
 
 
 def listing(request, id):
-    # Get listing by id and show listing page
-    listing = Listing.objects.get(pk=id)
+    # Check if listing exists
+    try:
+        listing = Listing.objects.get(pk=id)
+    
+    except Listing.DoesNotExist:
+        return render(request, "auctions/error.html", {
+            "code": 404,
+            "message": "The listing does not exist."
+        })
+
+    # Set user and defaults for watchlist
+    user = request.user
+    watching = False
+
+    # Check if listing in watchlist
+    if user.is_authenticated and Watchlist.objects.filter(user=user, listings=listing):
+        watching = True
+
+    # Return listing page
     return render(request, "auctions/listing.html", {
-        "listing": listing
+        "listing": listing,
+        "watching": watching
     })
 
 
@@ -107,3 +167,41 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+
+@login_required(login_url="login")
+def removeWatchlist(request, id):
+    # Only POST method allowed
+    if request.method == "POST":
+        # Check if listing exists
+        try:
+            listing = Listing.objects.get(pk=id)
+        
+        except Listing.DoesNotExist:
+            return render(request, "auctions/error.html", {
+                "code": 404,
+                "message": "The listing does not exist."
+            })
+        
+        # Check if listing in watchlist
+        if Watchlist.objects.filter(user=request.user, listings=listing):
+            # Get user's watchlist
+            watchlist = Watchlist.objects.get(user=request.user)
+
+            # Remove listing from watchlist
+            watchlist.listings.remove(listing)
+
+            # Show success message an return listing page
+            messages.success(request, "Listing removed your watchlist.")
+            return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+        
+        else:
+            # Show error message and return listing page
+            messages.error(request, "Cannot remove listing not in your watchlist.")
+            return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+    
+    # GET method not allowed
+    return render(request, "auctions/error.html", {
+        "code": 405,
+        "message": "GET method not allowed."
+    })
