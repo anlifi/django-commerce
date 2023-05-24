@@ -205,3 +205,23 @@ def removeWatchlist(request, id):
         "code": 405,
         "message": "GET method not allowed."
     })
+
+
+@login_required(login_url="login")
+def watchlist(request):
+    # Check if watchlist exists
+    try:
+        watchlist = Watchlist.objects.get(user=request.user)
+    except Watchlist.DoesNotExist:
+        # Return empty watchlist
+        return render(request, "auctions/watchlist.html")
+    
+    # Get listings in watchlist and number of listings
+    listings = watchlist.listings.all()
+    count = len(listings)
+
+    # Return watchlist page with listings
+    return render(request, "auctions/watchlist.html", {
+        "listings": listings,
+        "count": count
+    })
