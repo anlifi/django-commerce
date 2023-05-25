@@ -14,15 +14,27 @@ header, main {
     margin: 1rem 2rem;
 }
 
-.container-fluid {
-    margin: 1rem 1rem;
+.col {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }
 
-.container-fluid .row {
-    margin: 0;
+.container-fluid {
+    margin: 1rem 1rem;
     padding: 0;
+    width: auto;
+}
+
+.container-fluid.row {
+    border: 1px solid grey;
 }
 
 .img-fluid {
+    margin: 1rem 0;
     max-width: 80%;
+    max-height: 30vh;
+}
+
+.col-3>.img-fluid {
+    max-width: 100%;
 }
