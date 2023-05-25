@@ -13,6 +13,7 @@ GARD = "GARD"
 CATEGORY_CHOICES = [
     (NONE, "Other"),
     (FASH, "Fashion"),
+    (HOME, "Home"),
     (TOYS, "Toys"),
     (ELEC, "Electronics"),
     (PETS, "Pets"),
