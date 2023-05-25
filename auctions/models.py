@@ -62,7 +62,7 @@ class Listing(models.Model):
     starting_bid = models.DecimalField(max_digits=9, decimal_places=2, default=0.00)
     current_bid = models.DecimalField(max_digits=9, decimal_places=2, default=0.00)
     image_url = models.URLField(max_length=255, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="category_listings", blank=True, default=Category.objects.get_default_category)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="category_listings", blank=True, null=True, default=Category.objects.get_default_category)
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="seller_listings")
     closed = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)

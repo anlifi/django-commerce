@@ -7,24 +7,26 @@
 
     <h2>Active Listings</h2>
 
-    {% for listing in listings %}
-        <div class="container-fluid row border border-secondary">
-            <div class="col-3 align-self-center">
-                {% if listing.image_url %}
-                    <img class="img-fluid" alt="{{ listing.title }}" src="{{ listing.image_url }}">
-                {% else %}
-                    <img class="img-fluid" alt="No image available" src="https://t3.ftcdn.net/jpg/04/34/72/82/240_F_434728286_OWQQvAFoXZLdGHlObozsolNeuSxhpr84.jpg">
-                {% endif %}
+    <div class="pb-3">
+        {% for listing in listings %}
+            <div class="container-fluid row border border-secondary">
+                <div class="col-3 align-self-center">
+                    {% if listing.image_url %}
+                        <img class="img-fluid" alt="{{ listing.title }}" src="{{ listing.image_url }}">
+                    {% else %}
+                        <img class="img-fluid" alt="No image available" src="https://t3.ftcdn.net/jpg/04/34/72/82/240_F_434728286_OWQQvAFoXZLdGHlObozsolNeuSxhpr84.jpg">
+                    {% endif %}
+                </div>
+                <div class="col align-self-start">
+                    <h3><a href="{% url 'listing' id=listing.pk %}">{{ listing.title }}</a></h3>
+                    <p><b>Price:</b> ${{ listing.current_bid }}</p>
+                    <p>{{ listing.description }}</p>
+                    <small>
+                        <span class="text-muted">Created {{ listing.creation_date }}</span>
+                    </small>
+                </div>
             </div>
-            <div class="col align-self-start">
-                <h3><a href="{% url 'listing' id=listing.pk %}">{{ listing.title }}</a></h3>
-                <p><b>Price:</b> ${{ listing.current_bid }}</p>
-                <p>{{ listing.description }}</p>
-                <small>
-                    <span class="text-muted">Created {{ listing.creation_date }}</span>
-                </small>
-            </div>
-        </div>
-    {% endfor %}    
+        {% endfor %}
+    </div>
 
 {% endblock %}
