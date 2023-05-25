@@ -117,6 +117,41 @@ def bid(request, id):
     })
 
 
+def categories(request):
+    # Return all categories in categories page
+    return render(request, "auctions/categories.html", {
+        "categories": Category.objects.all()
+    })
+
+
+def category(request, category_id):
+    # Get category
+    try:
+        category = Category.objects.get(pk=category_id)
+    
+    except Category.DoesNotExist:
+        return render(request, "auctions/error.html", {
+            "code": 404,
+            "message": "Category does not exist."
+        })
+
+    # Get all active listings in category ordered by creation date
+    try:
+        listings = Listing.objects.filter(category=category_id, closed=False).order_by("-creation_date")
+    
+    except Listing.DoesNotExist:
+        return render(request, "auctions/error.html", {
+            "code": 404,
+            "message": "Listings do not exist."
+        })
+    
+    # Return category page with all it's listings
+    return render(request, "auctions/category.html", {
+        "category": category,
+        "listings": listings
+    })
+
+
 @login_required(login_url="login")
 def close(request, id):
     # Only POST method allowed

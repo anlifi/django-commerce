@@ -1,7 +1,24 @@
-*, html, body {
+body, html {
     margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+* {
+    box-sizing: inherit;
 }
 
 .container-fluid {
     margin: 1rem 1rem;
+}
+
+.container-fluid .row {
+    margin: 0;
+    padding: 0;
+}
+
+.img-fluid {
+    max-width: 80%;
 }

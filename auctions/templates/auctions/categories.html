@@ -1,0 +1,17 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <h2>Categories</h2>
+
+    <div class="container-fluid">
+        <ul>
+            {% for category in categories %}
+                {% if category.name != "No Category Listed" %}
+                <li><a href="{% url 'category' category_id=category.pk %}">{{ category.name }}</a></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+
+{% endblock %}

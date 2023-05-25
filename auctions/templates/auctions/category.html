@@ -1,7 +1,7 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+    <h2>{{ category.name }}</h2>
 
     {% for listing in listings %}
         <div class="container-fluid row align-items-center">
@@ -18,6 +18,9 @@
                 <p>${{ listing.current_bid }}</p>
             </div>
         </div>
-    {% endfor %}    
+
+        {% empty %}
+        <p>No listings in this category found.</p>
+    {% endfor %}
 
 {% endblock %}
