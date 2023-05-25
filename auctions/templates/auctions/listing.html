@@ -24,6 +24,14 @@
             {% endif %}
         {% endif %}
     
+        <!-- Edit listing -->
+        {% if user.is_authenticated and not listing.closed and listing.seller == user %}
+            <form action="{% url 'edit' id=listing.pk %}" method="get">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-sm mr-2">Edit Listing</button>
+            </form>
+        {% endif %}
+    
         <!-- Close auction -->
         {% if user.is_authenticated and not listing.closed and listing.seller == user %}
             <form action="{% url 'close' id=listing.pk %}" method="post">

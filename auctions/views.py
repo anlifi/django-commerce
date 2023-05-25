@@ -254,9 +254,48 @@ def create(request):
     })
 
 
+@login_required(login_url="login")
+def edit(request, id):
+    # Check if listing exists
+    try:
+        listing = Listing.objects.get(pk=id, closed=False)
+    
+    except Listing.DoesNotExist:
+        return render(request, "auctions/error.html", {
+            "code": 404,
+            "message": "The listing does not exist."
+        })
+    
+    # If method is POST
+    if request.method == "POST":
+        # Create form instance with POST data and check if valid
+        form = NewListingForm(request.POST, instance=listing)
+        if form.is_valid():            
+            # Save form data
+            form.save()
+
+            # Show success message and return listing page
+            messages.success(request, "Listing was updated.")
+            return HttpResponseRedirect(reverse("listing", kwargs={"id": listing.pk}))
+        
+        else:
+            # If invalid show error message and return form with existing data
+            messages.error(request, "Invalid form. Please resubmit.")
+            return render(request, "auctions/create.html", {
+                "form": form
+            })
+    
+    # If method is GET, show form with listing instance data
+    form = NewListingForm(instance=listing)
+    return render(request, "auctions/create.html", {
+        "form": form,
+        "id": id
+    })
+
+
 def index(request):
-    # Get all active listings, newest first
-    listings = Listing.objects.filter(closed=False).order_by("-creation_date")
+    # Get all active listings, last updated first
+    listings = Listing.objects.filter(closed=False).order_by("-update_date")
     return render(request, "auctions/index.html", {
         "listings": listings
     })
