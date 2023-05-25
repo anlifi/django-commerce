@@ -8,20 +8,30 @@
     
     <h2>Listing: {{ listing.title }}</h2>
 
-    <!-- Add or remove watchlist -->
-    {% if user.is_authenticated %}
-        {% if watching %}
-            <form action="{% url 'remove' id=listing.pk %}" method="post">
+    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+        <!-- Add/remove to/from watchlist -->
+        {% if user.is_authenticated %}
+            {% if watching %}
+                <form action="{% url 'remove' id=listing.pk %}" method="post">
+                    {% csrf_token %}
+                    <button class="btn btn-secondary btn-sm mr-2" type="submit" name="remove">Remove from Watchlist</button>
+                </form>
+            {% else %}
+                <form action="{% url 'add' id=listing.pk %}" method="post">
+                    {% csrf_token %}
+                    <button class="btn btn-secondary btn-sm mr-2" type="submit" name="add">Add to Watchlist</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    
+        <!-- Close auction -->
+        {% if user.is_authenticated and not listing.closed and listing.seller == user %}
+            <form action="{% url 'close' id=listing.pk %}" method="post">
                 {% csrf_token %}
-                <button class="btn btn-secondary btn-sm" type="submit" name="remove">Remove from Watchlist</button>
-            </form>
-        {% else %}
-            <form action="{% url 'add' id=listing.pk %}" method="post">
-                {% csrf_token %}
-                <button class="btn btn-secondary btn-sm" type="submit" name="add">Add to Watchlist</button>
+                <button type="submit" class="btn btn-danger btn-sm mr-2">Close Auction</button>
             </form>
         {% endif %}
-    {% endif %}
+    </div>
 
     <!-- Listing info -->
     <div>
@@ -77,16 +87,9 @@
                 <li>Listed by: <b>{{ listing.seller.username }}</b></li>
                 <li>Category: {{ listing.category }}</li>
                 <li>Created: {{ listing.creation_date }}</li>
+                <li>Last updated: {{ listing.update_date }}</li>
             </ul>
         </div>
-
-        <!-- Close auction -->
-        {% if user.is_authenticated and not listing.closed and listing.seller == user %}
-            <form action="{% url 'close' id=listing.pk %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary mt-3">Close Auction</button>
-            </form>
-        {% endif %}
 
         <!-- Comments -->
         {% if user.is_authenticated %}

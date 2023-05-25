@@ -255,8 +255,8 @@ def create(request):
 
 
 def index(request):
-    # Get all active listings
-    listings = Listing.objects.filter(closed=False)
+    # Get all active listings, newest first
+    listings = Listing.objects.filter(closed=False).order_by("-creation_date")
     return render(request, "auctions/index.html", {
         "listings": listings
     })
