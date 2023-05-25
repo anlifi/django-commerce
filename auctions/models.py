@@ -11,7 +11,7 @@ PETS = "PETS"
 GARD = "GARD"
 
 CATEGORY_CHOICES = [
-    (NONE, "No Category Listed"),
+    (NONE, "Other"),
     (FASH, "Fashion"),
     (TOYS, "Toys"),
     (ELEC, "Electronics"),
