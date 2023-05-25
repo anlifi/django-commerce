@@ -464,9 +464,12 @@ def removeWatchlist(request, id):
             # Remove listing from watchlist
             watchlist.listings.remove(listing)
 
-            # Show success message an return listing page
-            messages.success(request, "Listing removed your watchlist.")
-            return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+            # Show success message an return listing page or watchlist page depeding on origin
+            messages.success(request, "Listing removed from your watchlist.")
+            if "/watchlist" in request.META["HTTP_REFERER"]:
+                return HttpResponseRedirect(reverse("watchlist"))
+            else:
+                return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
         
         else:
             # Show error message and return listing page
@@ -489,12 +492,12 @@ def watchlist(request):
         # Return empty watchlist
         return render(request, "auctions/watchlist.html")
     
-    # Get listings in watchlist and number of listings
+    # Get listings in watchlist
     listings = watchlist.listings.all()
-    count = listings.count()
 
     # Return watchlist page with listings
     return render(request, "auctions/watchlist.html", {
         "listings": listings,
-        "count": count
+        "count": listings.count(),
+        "watchlist": True
     })

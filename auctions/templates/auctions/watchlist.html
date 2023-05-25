@@ -1,6 +1,10 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
+
+    <!-- Success or error messages -->
+    {% include "auctions/messages.html" %}
+    
     <h2>Watchlist</h2>
 
     {% if count > 1 %}
