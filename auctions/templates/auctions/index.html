@@ -14,8 +14,11 @@
             </div>
             <div class="col">
                 <h3><a href="{% url 'listing' id=listing.pk %}">{{ listing.title }}</a></h3>
+                <p><b>Price:</b> ${{ listing.current_bid }}</p>
                 <p>{{ listing.description }}</p>
-                <p>${{ listing.current_bid }}</p>
+                <small>
+                    <span class="text-muted">Created {{ listing.creation_date }}</span>
+                </small>
             </div>
         </div>
     {% endfor %}    
