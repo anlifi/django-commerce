@@ -3,10 +3,10 @@
 
 {% block body %}
 
-    <h2>Create Listings</h2>
-
     <!-- Success or error messages -->
-    {% if include "auctions/messages.html" %}
+    {% include "auctions/messages.html" %}
+
+    <h2>Create Listings</h2>
 
     <form class="container ml-0 pl-0" action="{% url 'create' %}" method="post">
         {% csrf_token %}

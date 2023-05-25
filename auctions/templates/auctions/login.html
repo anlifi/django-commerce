@@ -2,11 +2,10 @@
 
 {% block body %}
 
-    <h2>Login</h2>
+    <!-- Success or error messages -->
+    {% include "auctions/messages.html" %}
 
-    {% if message %}
-        <div>{{ message }}</div>
-    {% endif %}
+    <h2>Login</h2>
 
     <form action="{% url 'login' %}" method="post">
         {% csrf_token %}

@@ -336,17 +336,23 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
+
+            # Show success message and return index page
+            messages.success(request, "Login successful.")
             return HttpResponseRedirect(reverse("index"))
+        
         else:
-            return render(request, "auctions/login.html", {
-                "message": "Invalid username and/or password."
-            })
+            # Show error message and return login page
+            messages.error(request, "Invalid username and/or password.")
+            return render(request, "auctions/login.html")
     else:
         return render(request, "auctions/login.html")
 
 
 def logout_view(request):
+    # Logout user, show success message and return index page
     logout(request)
+    messages.success(request, "Logout successful.")
     return HttpResponseRedirect(reverse("index"))
 
 
@@ -359,20 +365,24 @@ def register(request):
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         if password != confirmation:
-            return render(request, "auctions/register.html", {
-                "message": "Passwords must match."
-            })
+            # Show error message and return registration form
+            messages.error(request, "Passwords must match.")
+            return render(request, "auctions/register.html")
 
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
-            return render(request, "auctions/register.html", {
-                "message": "Username already taken."
-            })
+            # Show error message and return registration form
+            messages.error(request, "Username already taken.")
+            return render(request, "auctions/register.html")
+        
+        # Login user, show success message and return index page
         login(request, user)
+        messages.success(request, "Registration successful." )
         return HttpResponseRedirect(reverse("index"))
+    
     else:
         return render(request, "auctions/register.html")
 
