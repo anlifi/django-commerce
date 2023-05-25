@@ -37,9 +37,8 @@ def addWatchlist(request, id):
             messages.error(request, "This listing is already in your watchlist.")
             return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
         
-        # Add listing to watchlist and session
+        # Add listing to watchlist
         watchlist.listings.add(listing)
-        request.session["watchlist_count"] = watchlist.listings.count()
 
         # Show success message and return listing page
         messages.success(request, "Listing added to your watchlist.")
@@ -408,7 +407,6 @@ def removeWatchlist(request, id):
 
             # Remove listing from watchlist
             watchlist.listings.remove(listing)
-            request.session["watchlist_count"] = watchlist.listings.count()
 
             # Show success message an return listing page
             messages.success(request, "Listing removed your watchlist.")

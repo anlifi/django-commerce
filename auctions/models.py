@@ -28,6 +28,9 @@ class User(AbstractUser):
     
     def get_username(self):
         return self.username
+    
+    def get_watchlist_items(self):
+        return self.user_watchlist.first().listings.count()
 
 
 class CategoryManager(models.Manager):

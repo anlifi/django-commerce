@@ -12,7 +12,7 @@
     {% endif %}
 
     {% for listing in listings %}
-        <div class="container-fluid row">
+        <div class="container-fluid row border border-secondary">
             <div class="col-3 align-self-center">
                 {% if listing.image_url %}
                     <img class="img-fluid" alt="{{ listing.title }}" src="{{ listing.image_url }}">
