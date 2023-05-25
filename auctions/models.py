@@ -64,7 +64,7 @@ class Listing(models.Model):
     image_url = models.URLField(max_length=255, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="category_listings", blank=True, null=True, default=Category.objects.get_default_category)
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="seller_listings")
-    winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="winner_listings", default=None, null=True)
+    winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="winner_listings", default=None, blank=True, null=True)
     closed = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
