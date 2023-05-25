@@ -19,6 +19,10 @@ header, main {
     padding-bottom: 1rem;
 }
 
+.col-3>.img-fluid {
+    max-width: 100%;
+}
+
 .container-fluid {
     margin: 1rem 1rem;
     padding: 0;
@@ -31,6 +35,6 @@ header, main {
     max-height: 30vh;
 }
 
-.col-3>.img-fluid {
-    max-width: 100%;
+.font-weight-medium {
+    font-weight: 500;
 }

@@ -36,9 +36,11 @@
             {% if user.is_authenticated and listing.closed %}
                 <p class="font-weight-medium text-primary">Auction closed.</p>
                 {% if winner %}
-                    <p class="font-weight-medium text-primary">Congrats, you have won the auction for this listing.</p>
-                {% else %}
+                    <p class="font-weight-medium text-primary">Congrats, you have won the auction for this listing!</p>
+                {% elif not winner and user != listing.seller %}
                     <p class="font-weight-medium text-primary">Sorry, you have not won the auction for this listing.</p>
+                {% else %}
+                    <p class="font-weight-medium text-primary"><span class="font-weight-bold">{{ highest_bidder.username }}</span> has won the auction.</p>
                 {% endif %}
             {% endif %}
         </div>
@@ -72,7 +74,7 @@
         <div class="mt-4">
             <h3>Details</h3>
             <ul>
-                <li>Listed by: {{ listing.seller.username }}</li>
+                <li>Listed by: <b>{{ listing.seller.username }}</b></li>
                 <li>Category: {{ listing.category }}</li>
                 <li>Created: {{ listing.creation_date }}</li>
             </ul>
