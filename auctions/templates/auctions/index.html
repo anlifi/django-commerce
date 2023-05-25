@@ -5,7 +5,7 @@
     <!-- Success or error messages -->
     {% include "auctions/messages.html" %}
 
-    <h2>Active Listings</h2>
+    <h2>{% if closed %}Closed{% else %}Active{% endif %} Listings</h2>
 
     {% include "auctions/listing_rows.html" %}
 

@@ -173,6 +173,14 @@ def close(request, id):
         
         # Close auction
         listing.closed = True
+
+        # Check if bids exist
+        if Bid.objects.filter(listing=listing):
+            # Get highest bidder and save as winner
+            highest_bidder = Bid.objects.filter(listing=listing).order_by("-bid_amount").first().bidder
+            listing.winner = highest_bidder
+
+        # Save changes
         listing.save()
 
         # Show success message and return listing page
@@ -183,6 +191,15 @@ def close(request, id):
     return render(request, "auctions/error.html", {
         "code": 405,
         "message": "GET method not allowed."
+    })
+
+
+def closed(request):
+    # Get all closed listings, last updated first
+    listings = Listing.objects.filter(closed=True).order_by("-update_date")
+    return render(request, "auctions/index.html", {
+        "listings": listings,
+        "closed": True
     })
 
 

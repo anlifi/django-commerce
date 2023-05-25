@@ -10,13 +10,16 @@
             </div>
             <div class="col align-self-start">
                 <h3><a href="{% url 'listing' id=listing.pk %}">{{ listing.title }}</a></h3>
-                <p><b>Price:</b> ${{ listing.current_bid }}</p>
+                <p>Price: <b>${{ listing.current_bid }}</b></p>
                 <p>{{ listing.description }}</p>
                 <small>
                     <span class="text-muted">Created {{ listing.creation_date }}</span>
                     <br>
                     <span class="text-muted">Last Updated {{ listing.update_date }}</span>
                 </small>
+                {% if listing.winner %}
+                <p class="mt-3">Winner: <b>{{ listing.winner.username }}</b></p>
+                {% endif %}
             </div>
         </div>
 
