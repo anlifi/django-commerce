@@ -10,6 +10,10 @@ body, html {
     box-sizing: inherit;
 }
 
+header, main {
+    margin: 1rem 2rem;
+}
+
 .container-fluid {
     margin: 1rem 1rem;
 }
